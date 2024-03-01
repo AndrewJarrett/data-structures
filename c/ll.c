@@ -32,28 +32,28 @@ void insert_after(List *p_list, Node *p_node, Node *p_new_node)
 	update_last(p_list, p_node, p_new_node);
 }
 
-void remove_after(List *p_list, Node node)
+void remove_after(List *p_list, Node *p_node)
 {
-	Node *to_remove = node.next;
+	Node *to_remove = p_node->next;
 	if (to_remove != NULL)
 	{
 		Node *next_node = to_remove->next;
-		node.next = next_node;
+		p_node->next = next_node;
 		update_last(p_list, to_remove, next_node);
 	}
 	else
 	{
-		node.next = NULL;
-		update_last(p_list, to_remove, node.next);
+		p_node->next = NULL;
+		update_last(p_list, to_remove, p_node->next);
 	}
 }
 
-void insert_last(List *p_list, Node node)
+void insert_last(List *p_list, Node *p_node)
 {
 	if (p_list->last != NULL)
 	{
-		p_list->last->next = &node;
-		p_list->last = &node;
+		p_list->last->next = p_node;
+		p_list->last = p_node;
 	}
 }
 
@@ -77,7 +77,7 @@ void remove_last(List *p_list)
 			else if (node->next == NULL)
 			{
 				// Remove this node (i.e. the node after the prev node)
-				remove_after(p_list, *prev_node);
+				remove_after(p_list, prev_node);
 			}
 
 			prev_node = node;
@@ -133,7 +133,7 @@ Node* remove_node(List *p_list, int i)
 	}
 
 	return_node = prev_node->next;
-	remove_after(p_list, *prev_node);
+	remove_after(p_list, prev_node);
 
 	return return_node;
 }

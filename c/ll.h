@@ -11,11 +11,11 @@ typedef struct List {
 	int size;
 } List;
 
-void insert_first(List *p_list, Node *node);
+void insert_first(List *p_list, Node *p_node);
 void remove_first(List *p_list);
-void insert_after(List *p_list, Node *node, Node *new_node);
-void remove_after(List *p_list, Node node);
-void insert_last(List *p_list, Node node);
+void insert_after(List *p_list, Node *p_node, Node *p_new_node);
+void remove_after(List *p_list, Node *p_node);
+void insert_last(List *p_list, Node *p_node);
 void remove_last(List *p_list);
 
 Node* get_node(List *p_list, int i);
