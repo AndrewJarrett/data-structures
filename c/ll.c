@@ -12,7 +12,7 @@ void insert_first(List list, Node node)
 	}
 }
 
-void remove_first(List list, Node node)
+void remove_first(List list)
 {
 	if (list.first != NULL)
 	{
@@ -24,10 +24,12 @@ void remove_first(List list, Node node)
 	}
 }
 
-void insert_after(Node node, Node newNode)
+void insert_after(List list, Node node, Node newNode)
 {
 	newNode.next = node.next;
 	node.next = &newNode;
+
+	update_last(list, node, newNode);
 }
 
 void remove_after(List list, Node node)
@@ -42,6 +44,45 @@ void remove_after(List list, Node node)
 	else
 	{
 		node.next = NULL;
+		update_last(list, *toRemove, *node.next);
+	}
+}
+
+void insert_last(List list, Node node)
+{
+	if (list.last != NULL)
+	{
+		list.last->next = &node;
+		list.last = &node;
+	}
+}
+
+void remove_last(List list)
+{
+	if (list.last != NULL && list.first != NULL)
+	{
+		Node *prevNode = list.first;
+		Node *node = prevNode->next;
+
+		do
+		{
+			// Is this the last node?
+			if (node == NULL)
+			{
+				// Only happens at the beginning
+				prevNode->next = NULL;
+				list.last = prevNode;
+				break;
+			}
+			else if (node->next == NULL)
+			{
+				// Remove this node (i.e. the node after the prev node)
+				remove_after(list, *prevNode);
+			}
+
+			prevNode = node;
+		}
+		while (node->next != NULL);
 	}
 }
 
@@ -52,10 +93,6 @@ void update_last(List list, Node prevNode, Node newNode)
 	if (list.last == &prevNode)
 	{
 		list.last = &newNode;
-	}
-	else
-	{
-		list.last = NULL;
 	}
 }
 
