@@ -1,14 +1,10 @@
 #include <stdio.h>
+#include "ll.c"
 
 int main(int argc, char *argv[]) 
 {
-	printf("Welcome to data structures in C! Let's have fun.");
+	printf("Welcome to data structures in C! Let's have fun.\n\n");
 
-	printf("Here is the linked list implementation");
-
-	static const int NUM_NODES = 100;
-	for (int i = 0; i < NUM_NODES; i++)
-	{
-		printf("Insert node %i", i);
-	}
+	// Call Linked List test
+	ll_test(1000);
 }
