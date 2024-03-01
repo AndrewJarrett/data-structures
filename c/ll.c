@@ -2,13 +2,13 @@
 
 #include "ll.h"
 
-void insert_first(List *p_list, Node node)
+void insert_first(List *p_list, Node *p_node)
 {
-	p_list->first = &node;
+	p_list->first = p_node;
 
 	if (p_list->last == NULL)
 	{
-		p_list->last = &node;
+		p_list->last = p_node;
 	}
 }
 
@@ -24,12 +24,12 @@ void remove_first(List *p_list)
 	}
 }
 
-void insert_after(List *p_list, Node node, Node new_node)
+void insert_after(List *p_list, Node *p_node, Node *p_new_node)
 {
-	new_node.next = node.next;
-	node.next = &new_node;
+	p_new_node->next = p_node->next;
+	p_node->next = p_new_node;
 
-	update_last(p_list, node, new_node);
+	update_last(p_list, p_node, p_new_node);
 }
 
 void remove_after(List *p_list, Node node)
@@ -39,12 +39,12 @@ void remove_after(List *p_list, Node node)
 	{
 		Node *next_node = to_remove->next;
 		node.next = next_node;
-		update_last(p_list, *to_remove, *next_node);
+		update_last(p_list, to_remove, next_node);
 	}
 	else
 	{
 		node.next = NULL;
-		update_last(p_list, *to_remove, *node.next);
+		update_last(p_list, to_remove, node.next);
 	}
 }
 
@@ -138,13 +138,13 @@ Node* remove_node(List *p_list, int i)
 	return return_node;
 }
 
-void update_last(List *p_list, Node prev_node, Node new_node)
+void update_last(List *p_list, Node *p_prev_node, Node *p_new_node)
 {
 	// Check to see if the prev node is the last node, and if so update
 	// it to be the new node
-	if (p_list->last == &prev_node)
+	if (p_list->last == p_prev_node)
 	{
-		p_list->last = &new_node;
+		p_list->last = p_new_node;
 	}
 }
 
@@ -161,24 +161,25 @@ List* ll_test_insert(int num_nodes)
 
 	List list;
 	List *p_list = &list;
-	Node prev_node;
+	Node *p_prev_node;
 
 	for (int i = 0; i < num_nodes; i++)
 	{
-		printf("Inserting node %i", i);
+		//printf("Inserting node %i\n", i);
 		Node node;
 		node.value = i;
+		Node *p_node = &node;
 		
 		if (p_list->first == NULL) 
 		{
-			insert_first(p_list, node);
+			insert_first(p_list, p_node);
 		}
 		else
 		{
-			insert_after(p_list, prev_node, node);
+			insert_after(p_list, p_prev_node, p_node);
 		}
 
-		prev_node = node;
+		p_prev_node = p_node;
 		p_list->size = i + 1;
 	}
 

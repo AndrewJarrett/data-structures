@@ -12,9 +12,9 @@ typedef struct List {
 	int size;
 } List;
 
-void insert_first(List *p_list, Node node);
+void insert_first(List *p_list, Node *node);
 void remove_first(List *p_list);
-void insert_after(List *p_list, Node node, Node newNode);
+void insert_after(List *p_list, Node *node, Node *new_node);
 void remove_after(List *p_list, Node node);
 void insert_last(List *p_list, Node node);
 void remove_last(List *p_list);
@@ -22,7 +22,7 @@ void remove_last(List *p_list);
 Node* get_node(List *p_list, int i);
 Node* remove_node(List *p_list, int i);
 
-void update_last(List *p_list, Node prevNode, Node newNode);
+void update_last(List *p_list, Node *p_prev_node, Node *p_new_node);
 
 // Test methods
 void ll_test_main(int num_nodes);
