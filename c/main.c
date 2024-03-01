@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "ll.c"
+#include "ll_tests.c"
 
 int main(int argc, char *argv[]) 
 {
