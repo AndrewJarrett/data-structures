@@ -159,11 +159,13 @@ List* ll_test_insert(int num_nodes)
 {
 	printf("Creating a linked list with %i number of nodes.\n", num_nodes);
 
-	List *p_list;
+	List list;
+	List *p_list = &list;
 	Node prev_node;
 
 	for (int i = 0; i < num_nodes; i++)
 	{
+		printf("Inserting node %i", i);
 		Node node;
 		node.value = i;
 		
