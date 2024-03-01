@@ -86,6 +86,29 @@ void remove_last(List list)
 	}
 }
 
+Node get(List list, int i)
+{
+	Node returnNode;
+
+	if (i >= list.size || i < 0) 
+	{
+		// Return null value
+		return returnNode;
+	}
+	else
+	{
+		int j = 0;
+		Node *node = list.first;
+
+		while(j <= i)
+		{
+			returnNode = *node->next;
+		}
+	}
+
+	return returnNode;
+}
+
 void update_last(List list, Node prevNode, Node newNode)
 {
 	// Check to see if the prev node is the last node, and if so update
