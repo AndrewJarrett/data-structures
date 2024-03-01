@@ -86,7 +86,7 @@ void remove_last(List list)
 	}
 }
 
-Node *get(List *list, int i)
+Node *get_node(List *list, int i)
 {
 	Node *return_node;
 
@@ -110,7 +110,7 @@ Node *get(List *list, int i)
 	return return_node;
 }
 
-Node* remove(List *list, int i)
+Node* remove_node(List *list, int i)
 {
 	Node *return_node;
 	Node *prev_node;
