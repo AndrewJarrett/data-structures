@@ -19,7 +19,8 @@ void remove_after(List list, Node node);
 void insert_last(List list, Node node);
 void remove_last(List list);
 
-Node get(List list, int i);
+Node* get(List *list, int i);
+Node* remove(List *list, int i);
 
 void update_last(List list, Node prevNode, Node newNode);
 

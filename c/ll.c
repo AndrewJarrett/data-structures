@@ -24,27 +24,27 @@ void remove_first(List list)
 	}
 }
 
-void insert_after(List list, Node node, Node newNode)
+void insert_after(List list, Node node, Node new_node)
 {
-	newNode.next = node.next;
-	node.next = &newNode;
+	new_node.next = node.next;
+	node.next = &new_node;
 
-	update_last(list, node, newNode);
+	update_last(list, node, new_node);
 }
 
 void remove_after(List list, Node node)
 {
-	Node *toRemove = node.next;
-	if (toRemove != NULL)
+	Node *to_remove = node.next;
+	if (to_remove != NULL)
 	{
-		Node *nextNode = toRemove->next;
-		node.next = nextNode;
-		update_last(list, *toRemove, *nextNode);
+		Node *next_node = to_remove->next;
+		node.next = next_node;
+		update_last(list, *to_remove, *next_node);
 	}
 	else
 	{
 		node.next = NULL;
-		update_last(list, *toRemove, *node.next);
+		update_last(list, *to_remove, *node.next);
 	}
 }
 
@@ -61,8 +61,8 @@ void remove_last(List list)
 {
 	if (list.last != NULL && list.first != NULL)
 	{
-		Node *prevNode = list.first;
-		Node *node = prevNode->next;
+		Node *prev_node = list.first;
+		Node *node = prev_node->next;
 
 		do
 		{
@@ -70,52 +70,81 @@ void remove_last(List list)
 			if (node == NULL)
 			{
 				// Only happens at the beginning
-				prevNode->next = NULL;
-				list.last = prevNode;
+				prev_node->next = NULL;
+				list.last = prev_node;
 				break;
 			}
 			else if (node->next == NULL)
 			{
 				// Remove this node (i.e. the node after the prev node)
-				remove_after(list, *prevNode);
+				remove_after(list, *prev_node);
 			}
 
-			prevNode = node;
+			prev_node = node;
 		}
 		while (node->next != NULL);
 	}
 }
 
-Node get(List list, int i)
+Node *get(List *list, int i)
 {
-	Node returnNode;
+	Node *return_node;
 
-	if (i >= list.size || i < 0) 
+	if (i >= list->size || i < 0) 
 	{
 		// Return null value
-		return returnNode;
+		return return_node;
 	}
 	else
 	{
 		int j = 0;
-		Node *node = list.first;
+		Node *node = list->first;
 
-		while(j <= i)
+		while (j <= i)
 		{
-			returnNode = *node->next;
+			node = node->next;
+			return_node = node;
 		}
 	}
 
-	return returnNode;
+	return return_node;
 }
 
-void update_last(List list, Node prevNode, Node newNode)
+Node* remove(List *list, int i)
+{
+	Node *return_node;
+	Node *prev_node;
+
+	if (list != NULL && (i >= list->size || i < 0))
+	{
+		// Return null value
+		return return_node;
+	}
+	else
+	{
+		int j = 0;
+		Node *prev_node = list->first;
+
+		while (j < i)
+		{
+			prev_node = prev_node->next;
+			return_node = prev_node;
+		}
+	}
+
+	return_node = prev_node->next;
+	remove_after(*list, *prev_node);
+
+	return return_node;
+}
+
+void update_last(List list, Node prev_node, Node new_node)
 {
 	// Check to see if the prev node is the last node, and if so update
 	// it to be the new node
-	if (list.last == &prevNode)
+	if (list.last == &prev_node)
 	{
-		list.last = &newNode;
+		list.last = &new_node;
 	}
 }
 
@@ -124,7 +153,7 @@ void ll_test(int num_nodes)
 	printf("Creating a linked list with %i number of nodes.\n", num_nodes);
 
 	List list;
-	Node priorNode;
+	Node prev_node;
 
 	for (int i = 0; i < num_nodes; i++)
 	{
@@ -137,10 +166,10 @@ void ll_test(int num_nodes)
 		}
 		else
 		{
-			insert_after(priorNode, node);
+			insert_after(prev_node, node);
 		}
 
-		priorNode = node;
+		prev_node = node;
 		list.size = i + 1;
 	}
 
