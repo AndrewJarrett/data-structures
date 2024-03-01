@@ -44,7 +44,7 @@ List* ll_test_insert(int num_nodes)
 
 void ll_test_remove(List *p_list)
 {
-	printf("Removing %i nodes from the linked list.\n", list->size);
+	printf("Removing %i nodes from the linked list.\n", p_list->size);
 
 	if (p_list != NULL && p_list->first != NULL)
 	{
