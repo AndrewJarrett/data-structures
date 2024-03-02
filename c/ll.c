@@ -10,6 +10,8 @@ void insert_first(List *p_list, Node *p_node)
 	{
 		p_list->last = p_node;
 	}
+
+	p_list->size = p_list->size + 1;
 }
 
 void remove_first(List *p_list)
@@ -17,10 +19,12 @@ void remove_first(List *p_list)
 	if (p_list->first != NULL)
 	{
 		p_list->first = p_list->first->next;
+		p_list->size = p_list->size - 1;
 	}
 	else
 	{
 		p_list->first = NULL;
+		p_list->size = 0;
 	}
 }
 
@@ -28,6 +32,7 @@ void insert_after(List *p_list, Node *p_node, Node *p_new_node)
 {
 	p_new_node->next = p_node->next;
 	p_node->next = p_new_node;
+	p_list->size = p_list->size + 1;
 
 	update_last(p_list, p_node, p_new_node);
 }
@@ -46,6 +51,8 @@ void remove_after(List *p_list, Node *p_node)
 		p_node->next = NULL;
 		update_last(p_list, to_remove, p_node->next);
 	}
+
+	p_list->size = p_list->size - 1;
 }
 
 void insert_last(List *p_list, Node *p_node)
@@ -54,6 +61,7 @@ void insert_last(List *p_list, Node *p_node)
 	{
 		p_list->last->next = p_node;
 		p_list->last = p_node;
+		p_list->size = p_list->size + 1;
 	}
 }
 
@@ -72,6 +80,7 @@ void remove_last(List *p_list)
 				// Only happens at the beginning
 				prev_node->next = NULL;
 				p_list->last = prev_node;
+				p_list->size = p_list->size - 1;
 				break;
 			}
 			else if (node->next == NULL)
