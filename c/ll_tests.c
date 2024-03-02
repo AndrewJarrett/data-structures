@@ -37,7 +37,7 @@ List* ll_test_insert(int num_nodes)
 		p_list->size = i + 1;
 	}
 
-	printf("Total linked p_list size: %i\n\n", p_list->size);
+	printf("Total linked list size: %i\n\n", p_list->size);
 
 	return p_list;
 }
@@ -49,11 +49,18 @@ void ll_test_remove(List *p_list)
 	if (p_list != NULL && p_list->first != NULL)
 	{
 		Node *p_node = p_list->first;
+		int i = 0;
 
 		while (p_node->next != NULL)
 		{
+			printf("Removing node %i\n", i);
+
 			remove_after(p_list, p_node);
+
 			p_node = p_node->next;
+			i++;
 		}
 	}
+
+	printf("Total linked list size: %i\n\n", p_list->size);
 }
