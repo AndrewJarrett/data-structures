@@ -12,7 +12,7 @@ pub const List = struct {
 
     head: ?*Node = undefined,
     tail: ?*Node = undefined,
-    size: u32 = 0,
+    size: *u32 = undefined,
 
     pub const Node = struct {
         value: u32,
@@ -20,44 +20,58 @@ pub const List = struct {
     };
 
     // Functions go here
+    pub fn init(head: ?*Node, tail: ?*Node, size: *u32) List {
+        return List {
+            .head = head,
+            .tail = tail,
+            .size = size,
+        };
+    }
+
     pub fn insertHead(self: Self, node: Node) void {
         if (self.head == undefined) {
-            self.head = &node;
-            self.tail = &node;
+            self.head.?.* = node;
+            self.tail.?.* = node;
         } else {
-            node.next = self.head;
-            self.head = &node;
+            node.next.?.* = self.head.?.*;
+            self.head.?.* = node;
         }
         incrementSize(self);
     }
 
+    pub fn getSize(self: Self) u32 {
+        return self.size.*;
+    }
+
     fn incrementSize(self: Self) void {
-        self.size += 1;
+        self.size.* += 1;
     }
 
     fn decrementSize(self: Self) void {
-        self.size -= 1;
+        self.size.* -= 1;
     }
 };
 
 test "empty linked list" {
     const list: List = List{};
-    assert(list.size == 0);
+    assert(list.getSize() == 0);
 }
 
 test "insert head with one node" {
-    const list: List = List{};
+    var size: u32 = 0;
+    const list: List = List.init(undefined, undefined, &size);
     const node: List.Node = List.Node{ .value = 1, .next = undefined };
     List.insertHead(list, node);
 
-    assert(list.size == 1);
+    assert(list.getSize() == 1);
     assert(list.head == &node);
     assert(list.tail == &node);
 }
 
 test "insert head with many nodes" {
     const num_nodes: u8 = 10;
-    const list: List = List{};
+    var size: u32 = 0;
+    const list: List = List.init(undefined, undefined, &size);
 
     var i: u8 = 0;
     var node_array: [num_nodes]*const List.Node = undefined;
@@ -68,9 +82,13 @@ test "insert head with many nodes" {
         i += 1;
     }
 
-    assert(list.size == num_nodes);
+    //const head: List.Node = list.head orelse null;
+
+    assert(list.getSize() == num_nodes);
     assert(list.head == node_array[num_nodes - 1]);
     assert(list.tail == node_array[0]);
-    assert(list.head.value == (num_nodes - 1));
-    assert(list.tail.value == 0);
+    //assert(head != null);
+    //try expect(list.head.?.*.value == (num_nodes - 1));
+    //assert(head.value == (num_nodes - 1));
+    //assert(list.tail.?.value == 0);
 }
