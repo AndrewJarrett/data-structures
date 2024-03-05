@@ -15,11 +15,12 @@ pub const List = struct {
     };
 
     // Functions go here
-    pub fn init(head: ?*Node, tail: ?*Node, size: *u32) List {
+    pub fn init() List {
+        var size: u32 = 0;
         return List {
-            .head = head,
-            .tail = tail,
-            .size = size,
+            .head = null,
+            .tail = null,
+            .size = &size,
         };
     }
 
@@ -48,14 +49,14 @@ pub const List = struct {
 };
 
 test "empty linked list" {
-    var size: u32 = 0;
-    const list: List = List.init(undefined, undefined, &size);
-    assert(list.getSize() == 0);
+    const list: List = List.init();
+    try expect(list.head == null);
+    try expect(list.tail == null);
+    try expect(list.getSize() == 0);
 }
 
 test "insert head with one node" {
-    var size: u32 = 0;
-    const list: List = List.init(undefined, undefined, &size);
+    const list: List = List.init();
     const node: List.Node = List.Node{ .value = 1, .next = undefined };
     List.insertHead(list, node);
 
@@ -66,8 +67,7 @@ test "insert head with one node" {
 
 test "insert head with many nodes" {
     const num_nodes: u8 = 10;
-    var size: u32 = 0;
-    const list: List = List.init(undefined, undefined, &size);
+    const list: List = List.init();
 
     var i: u8 = 0;
     var node_array: [num_nodes]*const List.Node = undefined;
