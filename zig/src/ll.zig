@@ -5,9 +5,9 @@ const assert = std.debug.assert;
 pub const List = struct {
     const Self = @This();
 
-    head: ?*Node = undefined,
-    tail: ?*Node = undefined,
-    size: *u32 = undefined,
+    head: ?*Node,
+    tail: ?*Node,
+    size: u32,
 
     pub const Node = struct {
         value: u32,
@@ -16,11 +16,10 @@ pub const List = struct {
 
     // Functions go here
     pub fn init() List {
-        var size: u32 = 0;
         return List {
             .head = null,
             .tail = null,
-            .size = &size,
+            .size = 0,
         };
     }
 
@@ -52,7 +51,7 @@ test "empty linked list" {
     const list: List = List.init();
     try expect(list.head == null);
     try expect(list.tail == null);
-    try expect(list.getSize() == 0);
+    try expect(list.size == 0);
 }
 
 test "insert head with one node" {
@@ -60,7 +59,7 @@ test "insert head with one node" {
     const node: List.Node = List.Node{ .value = 1, .next = undefined };
     List.insertHead(list, node);
 
-    assert(list.getSize() == 1);
+    assert(list.size == 1);
     assert(list.head == &node);
     assert(list.tail == &node);
 }
@@ -80,7 +79,7 @@ test "insert head with many nodes" {
 
     //const head: List.Node = list.head orelse null;
 
-    assert(list.getSize() == num_nodes);
+    assert(list.size == num_nodes);
     assert(list.head == node_array[num_nodes - 1]);
     assert(list.tail == node_array[0]);
     //assert(head != null);
