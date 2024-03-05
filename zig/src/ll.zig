@@ -2,11 +2,6 @@ const std = @import("std");
 const expect = std.testing.expect;
 const assert = std.debug.assert;
 
-//pub const Node = struct {
-//    value: u32 = undefined,
-//    next: *Node = undefined,
-//};
-
 pub const List = struct {
     const Self = @This();
 
@@ -29,12 +24,12 @@ pub const List = struct {
     }
 
     pub fn insertHead(self: Self, node: Node) void {
-        if (self.head == undefined) {
+        if (self.head) |head| {
+            node.next.?.* = head.*;
+            head.* = node;
+        } else {
             self.head.?.* = node;
             self.tail.?.* = node;
-        } else {
-            node.next.?.* = self.head.?.*;
-            self.head.?.* = node;
         }
         incrementSize(self);
     }
@@ -53,7 +48,8 @@ pub const List = struct {
 };
 
 test "empty linked list" {
-    const list: List = List{};
+    var size: u32 = 0;
+    const list: List = List.init(undefined, undefined, &size);
     assert(list.getSize() == 0);
 }
 
