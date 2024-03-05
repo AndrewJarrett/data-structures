@@ -5,6 +5,7 @@ const assert = std.debug.assert;
 pub const List = struct {
     const Self = @This();
 
+    allocator: std.mem.Allocator,
     head: ?*Node,
     tail: ?*Node,
     size: u32,
@@ -15,23 +16,24 @@ pub const List = struct {
     };
 
     // Functions go here
-    pub fn init() List {
+    pub fn init(allocator: std.mem.Allocator) List {
         return List {
             .head = null,
             .tail = null,
             .size = 0,
+            .allocator = allocator,
         };
     }
 
-    pub fn insertHead(self: Self, node: Node) void {
-        if (self.head) |head| {
-            node.next.?.* = head.*;
-            head.* = node;
-        } else {
-            self.head.?.* = node;
-            self.tail.?.* = node;
-        }
-        incrementSize(self);
+    pub fn insertHead(self: *Self, value: u32) void {
+        var node: Node = try self.allocator.create(Node);
+
+        const current_head = self.head;
+        node.value = value;
+        node.next = current_head;
+
+        self.head = node;
+        self.size += 1;
     }
 
     pub fn getSize(self: Self) u32 {
@@ -48,40 +50,56 @@ pub const List = struct {
 };
 
 test "empty linked list" {
-    const list: List = List.init();
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    const list: List = List.init(alloc);
+
     try expect(list.head == null);
     try expect(list.tail == null);
     try expect(list.size == 0);
 }
 
 test "insert head with one node" {
-    const list: List = List.init();
-    const node: List.Node = List.Node{ .value = 1, .next = undefined };
-    List.insertHead(list, node);
+    const value: u32 = 1;
 
-    assert(list.size == 1);
-    assert(list.head == &node);
-    assert(list.tail == &node);
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    const list: List = List.init(alloc);
+    List.insertHead(list, value);
+
+    try expect(list.size == 1);
+    try expect(list.head != null);
+    try expect(list.head.?.value == value);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == value);
 }
 
 test "insert head with many nodes" {
     const num_nodes: u8 = 10;
-    const list: List = List.init();
+
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    const list: List = List.init(alloc);
 
     var i: u8 = 0;
-    var node_array: [num_nodes]*const List.Node = undefined;
+    var value_array: [num_nodes]u32 = undefined;
     for (0..num_nodes) |_| {
-        const node: List.Node = List.Node{ .value = i, .next = undefined };
-        List.insertHead(list, node);
-        node_array[i] = &node;
+        List.insertHead(list, i);
+        value_array[i] = i;
         i += 1;
     }
 
     //const head: List.Node = list.head orelse null;
 
     assert(list.size == num_nodes);
-    assert(list.head == node_array[num_nodes - 1]);
-    assert(list.tail == node_array[0]);
+    assert(list.head == value_array[num_nodes - 1]);
+    assert(list.tail == value_array[0]);
     //assert(head != null);
     //try expect(list.head.?.*.value == (num_nodes - 1));
     //assert(head.value == (num_nodes - 1));
