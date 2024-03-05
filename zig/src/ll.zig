@@ -28,11 +28,21 @@ pub const List = struct {
     pub fn insertHead(self: *Self, value: u32) !void {
         var node: *Node = try self.allocator.create(Node);
 
+        // Setup the new node
         const current_head = self.head;
         node.value = value;
         node.next = current_head;
 
+        // Update the head
         self.head = node;
+
+        // Update tail
+        if (self.tail) |_| {
+            unreachable;
+        } else {
+            self.tail = node;
+        }
+
         self.size += 1;
     }
 
