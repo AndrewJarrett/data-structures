@@ -38,7 +38,7 @@ pub const List = struct {
 
         // Update tail
         if (self.tail) |_| {
-            unreachable;
+            // Ignore
         } else {
             self.tail = node;
         }
