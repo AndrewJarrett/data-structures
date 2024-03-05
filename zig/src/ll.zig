@@ -25,8 +25,8 @@ pub const List = struct {
         };
     }
 
-    pub fn insertHead(self: *Self, value: u32) void {
-        var node: Node = try self.allocator.create(Node);
+    pub fn insertHead(self: *Self, value: u32) !void {
+        var node: *Node = try self.allocator.create(Node);
 
         const current_head = self.head;
         node.value = value;
@@ -68,8 +68,8 @@ test "insert head with one node" {
     defer arena.deinit();
 
     const alloc = arena.allocator();
-    const list: List = List.init(alloc);
-    List.insertHead(list, value);
+    var list: List = List.init(alloc);
+    try list.insertHead(value);
 
     try expect(list.size == 1);
     try expect(list.head != null);
@@ -85,12 +85,12 @@ test "insert head with many nodes" {
     defer arena.deinit();
 
     const alloc = arena.allocator();
-    const list: List = List.init(alloc);
+    var list: List = List.init(alloc);
 
     var i: u8 = 0;
     var value_array: [num_nodes]u32 = undefined;
     for (0..num_nodes) |_| {
-        List.insertHead(list, i);
+        try list.insertHead(i);
         value_array[i] = i;
         i += 1;
     }
@@ -98,8 +98,8 @@ test "insert head with many nodes" {
     //const head: List.Node = list.head orelse null;
 
     assert(list.size == num_nodes);
-    assert(list.head == value_array[num_nodes - 1]);
-    assert(list.tail == value_array[0]);
+    assert(list.head.?.value == value_array[num_nodes - 1]);
+    assert(list.tail.?.value == value_array[0]);
     //assert(head != null);
     //try expect(list.head.?.*.value == (num_nodes - 1));
     //assert(head.value == (num_nodes - 1));
