@@ -46,6 +46,11 @@ pub const List = struct {
         self.size += 1;
     }
 
+    pub fn removeHead(self: *Self) !u32 {
+        _ = self;
+        return 0;
+    }
+
     pub fn getSize(self: Self) u32 {
         return self.size.*;
     }
@@ -89,7 +94,7 @@ test "insert head with one node" {
 }
 
 test "insert head with many nodes" {
-    const num_nodes: u8 = 10;
+    const num_nodes: u32 = 1000;
 
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
@@ -97,7 +102,7 @@ test "insert head with many nodes" {
     const alloc = arena.allocator();
     var list: List = List.init(alloc);
 
-    var i: u8 = 0;
+    var i: u32 = 0;
     var value_array: [num_nodes]u32 = undefined;
     for (0..num_nodes) |_| {
         try list.insertHead(i);
@@ -105,13 +110,68 @@ test "insert head with many nodes" {
         i += 1;
     }
 
-    //const head: List.Node = list.head orelse null;
+    try expect(list.size == num_nodes);
+    try expect(list.head != null);
+    try expect(list.head.?.value == value_array[num_nodes - 1]);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == value_array[0]);
+}
 
-    assert(list.size == num_nodes);
-    assert(list.head.?.value == value_array[num_nodes - 1]);
-    assert(list.tail.?.value == value_array[0]);
-    //assert(head != null);
-    //try expect(list.head.?.*.value == (num_nodes - 1));
-    //assert(head.value == (num_nodes - 1));
-    //assert(list.tail.?.value == 0);
+test "remove head with no nodes" {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List = List.init(alloc);
+
+    _ = try list.removeHead();
+
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+}
+
+test "remove head with one node" {
+    const value: u32 = 1;
+
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List = List.init(alloc);
+
+    try list.insertHead(value);
+    var head_value: u32 = try list.removeHead();
+
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+    try expect(head_value == value);
+}
+
+test "remove head with many nodes" {
+    const num_nodes: u32 = 1000;
+
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List = List.init(alloc);
+
+    var i: u32 = 0;
+    var value: u32 = undefined;
+    var value_array: [num_nodes]u32 = undefined;
+    for (0..num_nodes) |_| {
+        try list.insertHead(i);
+        value = try list.removeHead();
+        value_array[i] = value;
+        i += 1;
+    }
+
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+    for (0..num_nodes) |j| {
+        try expect(value_array[j] == j);
+    }
 }
