@@ -1,5 +1,6 @@
 const std = @import("std");
 const expect = std.testing.expect;
+const expectError = std.testing.expectError;
 const assert = std.debug.assert;
 
 pub const List = struct {
@@ -37,31 +38,35 @@ pub const List = struct {
         self.head = node;
 
         // Update tail
-        if (self.tail) |_| {
-            // Ignore
-        } else {
+        if (self.tail == null) {
             self.tail = node;
         }
 
         self.size += 1;
     }
 
-    pub fn removeHead(self: *Self) !u32 {
-        _ = self;
-        return 0;
+    pub fn removeHead(self: *Self) !?u32 {
+        var value: ?u32 = null;
+        var next_node: ?*Node = null;
+
+        if (self.head) |current_head| {
+            value = current_head.value;
+            next_node = current_head.next orelse null;
+            self.head = next_node;
+            defer self.allocator.destroy(current_head);
+
+            // Check if we have one node and destroy the tail if so
+            if (self.tail != null and std.meta.eql(self.tail.?, current_head)) {
+                self.allocator.destroy(self.tail.?);
+                self.tail = null;
+            }
+
+            self.size -= 1;
+        }
+
+        return value;
     }
 
-    pub fn getSize(self: Self) u32 {
-        return self.size.*;
-    }
-
-    fn incrementSize(self: Self) void {
-        self.size.* += 1;
-    }
-
-    fn decrementSize(self: Self) void {
-        self.size.* -= 1;
-    }
 };
 
 test "empty linked list" {
@@ -124,8 +129,9 @@ test "remove head with no nodes" {
     const alloc = arena.allocator();
     var list: List = List.init(alloc);
 
-    _ = try list.removeHead();
+    const value: ?u32 = try list.removeHead();
 
+    try expect(value == null);
     try expect(list.size == 0);
     try expect(list.head == null);
     try expect(list.tail == null);
@@ -141,12 +147,12 @@ test "remove head with one node" {
     var list: List = List.init(alloc);
 
     try list.insertHead(value);
-    var head_value: u32 = try list.removeHead();
+    var head_value: ?u32 = list.removeHead() catch null;
 
+    try expect(head_value.? == value);
     try expect(list.size == 0);
     try expect(list.head == null);
     try expect(list.tail == null);
-    try expect(head_value == value);
 }
 
 test "remove head with many nodes" {
@@ -159,12 +165,12 @@ test "remove head with many nodes" {
     var list: List = List.init(alloc);
 
     var i: u32 = 0;
-    var value: u32 = undefined;
-    var value_array: [num_nodes]u32 = undefined;
+    var value: ?u32 = null;
+    var value_array: [num_nodes]?u32 = undefined;
     for (0..num_nodes) |_| {
         try list.insertHead(i);
-        value = try list.removeHead();
-        value_array[i] = value;
+        value = list.removeHead() catch null;
+        value_array[i] = if (value) |val| val else null;
         i += 1;
     }
 
@@ -172,6 +178,6 @@ test "remove head with many nodes" {
     try expect(list.head == null);
     try expect(list.tail == null);
     for (0..num_nodes) |j| {
-        try expect(value_array[j] == j);
+        try expect(value_array[j].? == j);
     }
 }
