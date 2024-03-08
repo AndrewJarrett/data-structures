@@ -1,7 +1,10 @@
 const std = @import("std");
+
+// Testing related
 const expect = std.testing.expect;
 const expectError = std.testing.expectError;
 const assert = std.debug.assert;
+const heap_alloc = std.heap.page_allocator;
 
 pub const List = struct {
     const Self = @This();
@@ -57,8 +60,8 @@ pub const List = struct {
 
             // Check if we have one node and destroy the tail if so
             if (self.tail != null and std.meta.eql(self.tail.?, current_head)) {
-                self.allocator.destroy(self.tail.?);
-                self.tail = null;
+                defer self.tail = null;
+                defer self.allocator.destroy(self.tail.?);
             }
 
             self.size -= 1;
@@ -70,7 +73,7 @@ pub const List = struct {
 };
 
 test "empty linked list" {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
 
     const alloc = arena.allocator();
@@ -84,7 +87,7 @@ test "empty linked list" {
 test "insert head with one node" {
     const value: u32 = 1;
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
 
     const alloc = arena.allocator();
@@ -101,7 +104,7 @@ test "insert head with one node" {
 test "insert head with many nodes" {
     const num_nodes: u32 = 1000;
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
 
     const alloc = arena.allocator();
@@ -123,7 +126,7 @@ test "insert head with many nodes" {
 }
 
 test "remove head with no nodes" {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
 
     const alloc = arena.allocator();
@@ -140,7 +143,7 @@ test "remove head with no nodes" {
 test "remove head with one node" {
     const value: u32 = 1;
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
 
     const alloc = arena.allocator();
@@ -158,7 +161,7 @@ test "remove head with one node" {
 test "remove head with many nodes" {
     const num_nodes: u32 = 1000;
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
 
     const alloc = arena.allocator();
