@@ -3,7 +3,7 @@ const std = @import("std");
 // Testing related
 const expect = std.testing.expect;
 const expectError = std.testing.expectError;
-const assert = std.debug.assert;
+const expectEqual = std.testing.expectEqual;
 const heap_alloc = std.heap.page_allocator;
 
 pub fn List(comptime T: type) type {
@@ -70,6 +70,25 @@ pub fn List(comptime T: type) type {
 
             return value;
         }
+
+        pub fn insertTail(self: *Self, value: T) !void {
+            var node: *Node = try self.allocator.create(Node);
+
+            if (self.tail) |current_tail| {
+                current_tail.next = node;
+            }
+
+            node.value = value;
+            self.tail = node;
+
+            // Update head if there is only 1 node now
+            if (self.head == null) {
+                self.head = node;
+            }
+
+            self.size += 1;
+        }
+
     };
 }
 
@@ -184,4 +203,54 @@ test "remove head with many nodes" {
     for (0..num_nodes) |j| {
         try expect(value_array[j].? == j);
     }
+}
+
+test "list of strings" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List([]const u8) = List([]const u8).init(alloc);
+
+    try list.insertHead("string 1");
+    try list.insertHead("string 2");
+    try list.insertHead("string 3");
+
+    try expect(list.size == 3);
+    try expectEqual(list.head.?.value,  "string 3");
+    try expectEqual(list.tail.?.value,  "string 1");
+}
+
+test "test insert tail with single node" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    try list.insertTail(42);
+
+    try expect(list.size == 1);
+    try expect(list.head != null);
+    try expect(list.head.?.value == 42);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == 42);
+}
+
+test "test insert tail with multiple nodes" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    try list.insertTail(0);
+    try list.insertTail(10);
+    try list.insertTail(100);
+
+    try expect(list.size == 3);
+    try expect(list.head != null);
+    try expect(list.head.?.value == 0);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == 100);
 }
