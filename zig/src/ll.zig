@@ -281,6 +281,37 @@ test "test insert tail with multiple nodes" {
     try expect(list.tail.?.value == 100);
 }
 
+test "remove tail on empty list" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    const value_1: ?u32 = list.removeTail() catch null;
+
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+    try expect(value_1 == null);
+}
+
+test "remove tail with one node" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    try list.insertTail(101);
+    const value_1: ?u32 = list.removeTail() catch null;
+
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+    try expect(value_1 == 101);
+}
+
 test "test remove tail with multiple nodes" {
     var arena = std.heap.ArenaAllocator.init(heap_alloc);
     defer arena.deinit();
@@ -302,4 +333,3 @@ test "test remove tail with multiple nodes" {
     try expect(value_2 == 10);
     try expect(value_3 == 0);
 }
-
