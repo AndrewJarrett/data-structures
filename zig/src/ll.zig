@@ -89,6 +89,32 @@ pub fn List(comptime T: type) type {
             self.size += 1;
         }
 
+        pub fn removeTail(self: *Self) !?T {
+            var value: ?T = null;
+
+            if (self.tail) |current_tail| {
+                var node: *Node = self.head.?;
+                value = current_tail.value;
+
+                defer self.allocator.destroy(current_tail);
+
+                if (self.head == self.tail) {
+                    self.head = null;
+                    self.tail = null;
+                } else {
+                    while (node.next != null and node.next.? != current_tail) {
+                        node = node.next.?;
+                    }
+
+                    self.tail = node;
+                }
+
+                self.size -= 1;
+            }
+
+            return value;
+        }
+
     };
 }
 
@@ -254,3 +280,26 @@ test "test insert tail with multiple nodes" {
     try expect(list.tail != null);
     try expect(list.tail.?.value == 100);
 }
+
+test "test remove tail with multiple nodes" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    try list.insertTail(0);
+    try list.insertTail(10);
+    try list.insertTail(100);
+    const value_1: ?u32 = list.removeTail() catch null;
+    const value_2: ?u32 = list.removeTail() catch null;
+    const value_3: ?u32 = list.removeTail() catch null;
+
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+    try expect(value_1 == 100);
+    try expect(value_2 == 10);
+    try expect(value_3 == 0);
+}
+
