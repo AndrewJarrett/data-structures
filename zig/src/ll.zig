@@ -1,10 +1,16 @@
 const std = @import("std");
+const assert = std.debug.assert;
+const Param = std.builtin.Type.Fn.Param;
 
 // Testing related
 const expect = std.testing.expect;
 const expectError = std.testing.expectError;
 const expectEqual = std.testing.expectEqual;
 const heap_alloc = std.heap.page_allocator;
+
+pub const ListError = error {
+    IndexOutOfBounds,
+};
 
 pub fn List(comptime T: type) type {
     return struct {
@@ -66,6 +72,27 @@ pub fn List(comptime T: type) type {
                 }
 
                 self.size -= 1;
+            }
+
+            return value;
+        }
+
+        pub fn get(self: *Self, index: u32) !?T {
+            if (index < 0 or index >= self.size) {
+                return ListError.IndexOutOfBounds;
+            }
+
+            var value: ?T = null;
+            if (self.head) |current_head| {
+                var node: *Node = current_head;
+                var i: u32 = 0;
+
+                while (i <= index) {
+                    node = node.next.?;
+                    i += 1;
+                }
+
+                value = node.value;
             }
 
             return value;
@@ -279,6 +306,98 @@ test "test insert tail with multiple nodes" {
     try expect(list.head.?.value == 0);
     try expect(list.tail != null);
     try expect(list.tail.?.value == 100);
+}
+
+test "ensure get node uses an unsigned index" {
+    const fn_type = @TypeOf(List(void).get);
+    const fn_type_info = @typeInfo(fn_type);
+    const params: []const Param = fn_type_info.Fn.params;
+
+    std.log.info("{}", .{ u32 });
+
+    try expect(@TypeOf(params[0]) == @TypeOf(List(void)));
+    try expect(@TypeOf(params[1]) == @TypeOf(u32));
+}
+
+test "get node at index 0 of empty list" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    var value: ?u32 = list.get(0) catch null;
+
+    try expect(value == null);
+    try expect(list.size == 0);
+    try expect(list.head == null);
+    try expect(list.tail == null);
+}
+
+test "get node at overflow index of list" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    try list.insertHead(0);
+    try list.insertHead(1);
+    try list.insertHead(2);
+
+    var value: ?u32 = list.get(3) catch null;
+
+    try expect(value == null);
+    try expect(list.size == 3);
+    try expect(list.head != null);
+    try expect(list.head.?.value == 0);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == 100);
+}
+
+test "get node at index in middle of small list" {
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    try list.insertHead(0);
+    try list.insertHead(1);
+    try list.insertHead(2);
+
+    var value: ?u32 = list.get(1) catch null;
+
+    try expect(value != null);
+    try expect(value.? == 1);
+    try expect(list.size == 3);
+    try expect(list.head != null);
+    try expect(list.head.?.value == 2);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == 0);
+}
+
+test "get node at index in middle of large list" {
+    const num_nodes: u32 = 1000;
+    var arena = std.heap.ArenaAllocator.init(heap_alloc);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var list: List(u32) = List(u32).init(alloc);
+
+    for (0..num_nodes) |index| {
+        try list.insertHead(@intCast(index));
+    }
+
+    var value: ?u32 = list.get(num_nodes/2) catch null;
+
+    try expect(value != null);
+    try expect(value.? == (num_nodes/2));
+    try expect(list.size == num_nodes);
+    try expect(list.head != null);
+    try expect(list.head.?.value == num_nodes);
+    try expect(list.tail != null);
+    try expect(list.tail.?.value == 0);
 }
 
 test "remove tail on empty list" {
