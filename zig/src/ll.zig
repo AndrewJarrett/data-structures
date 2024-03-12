@@ -309,14 +309,19 @@ test "test insert tail with multiple nodes" {
 }
 
 test "ensure get node uses an unsigned index" {
-    const fn_type = @TypeOf(List(void).get);
-    const fn_type_info = @typeInfo(fn_type);
+    const fn_type_info = @typeInfo(@TypeOf(List(void).get));
     const params: []const Param = fn_type_info.Fn.params;
 
-    std.log.info("{}", .{ u32 });
+    //@compileLog(fn_type_info);
+    //@compileLog(params);
+    //@compileLog(params[0].type);
+    //@compileLog(params[1].type);
+    //@compileLog(@TypeOf(*List(void)));
+    //@compileLog(@TypeOf(u32));
 
-    try expect(@TypeOf(params[0]) == @TypeOf(List(void)));
-    try expect(@TypeOf(params[1]) == @TypeOf(u32));
+    try expect(params.len == 2);
+    try expect(params[0].type == *List(void));
+    try expect(params[1].type == u32);
 }
 
 test "get node at index 0 of empty list" {
@@ -350,9 +355,9 @@ test "get node at overflow index of list" {
     try expect(value == null);
     try expect(list.size == 3);
     try expect(list.head != null);
-    try expect(list.head.?.value == 0);
+    try expect(list.head.?.value == 2);
     try expect(list.tail != null);
-    try expect(list.tail.?.value == 100);
+    try expect(list.tail.?.value == 0);
 }
 
 test "get node at index in middle of small list" {
@@ -367,6 +372,8 @@ test "get node at index in middle of small list" {
     try list.insertHead(2);
 
     var value: ?u32 = list.get(1) catch null;
+
+    std.debug.print("value: {any}\n", .{ value });
 
     try expect(value != null);
     try expect(value.? == 1);
@@ -390,6 +397,9 @@ test "get node at index in middle of large list" {
     }
 
     var value: ?u32 = list.get(num_nodes/2) catch null;
+
+    std.debug.print("value: {any}\n", .{ value });
+    std.debug.print("value.?: {any}\n", .{ value.? });
 
     try expect(value != null);
     try expect(value.? == (num_nodes/2));
