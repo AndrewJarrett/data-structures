@@ -3,7 +3,7 @@ const expect = std.testing.expect;
 const AutoHashMap = std.AutoHashMap;
 
 // Write the nth Fibonacci number
-pub fn fibonacci(n: u8) u32 {
+pub fn fibonacci(n: u8) u64 {
     if (n == 0) return 0;
     if (n == 1) return 1;
 
@@ -11,7 +11,7 @@ pub fn fibonacci(n: u8) u32 {
 }
 
 // Memoize the nth fibonacci number
-pub fn memo_fib(n: u8, map: *AutoHashMap(u8, u32)) !u32 {
+pub fn memo_fib(n: u8, map: *AutoHashMap(u8, u64)) !u64 {
     const result = try map.getOrPut(n);
     
     if (result.found_existing) {
@@ -31,19 +31,42 @@ pub fn memo_fib(n: u8, map: *AutoHashMap(u8, u32)) !u32 {
 }
 
 // Iterate to the nth fibonacci number
-pub fn iter_fib(n: u8) u32 {
-    var sum: u32 = 0;
+pub fn iter_fib(n: u8) u64 {
+    var sum: u64 = 0;
 
     if (n < 2) {
         sum = @intCast(n);
     }
     else {
-        var sum_2: u32 = 0;
-        var sum_1: u32 = 1;
+        var sum_2: u64 = 0;
+        var sum_1: u64 = 1;
         for (1..n) |_| {
             sum = sum_2 + sum_1;
             sum_2 = sum_1;
             sum_1 = sum;
+        }
+    }
+
+    return sum;
+}
+
+// Memorator to the Fibonator
+pub fn iter_memo_fib(n: u8, map: *AutoHashMap(u8, u64)) !u64 {
+    var sum: u64 = 0;
+
+    var result = map.getOrPut(n);
+
+    if (result.found_existing) {
+        sum = result.value_ptr.*;
+    }
+    else {
+        for (0..n) |x| {
+            if (x == 0 or x == 1) {
+                try map.put(x, x);
+                sum = x;
+            }
+            sum = map.get(x - 2) + map.get(x - 1);
+            try map.put(x, sum);
         }
     }
 
@@ -69,7 +92,7 @@ test "it should memomize the fibonachos" {
     defer arena.deinit();
 
     const alloc = arena.allocator();
-    var map = AutoHashMap(u8, u32).init(alloc);
+    var map = AutoHashMap(u8, u64).init(alloc);
 
     try expect(55 == try memo_fib(10, &map));
     try expect(34 == try memo_fib(9, &map));
@@ -96,4 +119,24 @@ test "it should iter to the nth fibber" {
         try expect(21 == iter_fib(8));
         try expect(34 == iter_fib(9));
         try expect(55 == iter_fib(10));
+}
+
+test "it should memorate the fibonate" {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var map = AutoHashMap(u8, u64).init(alloc);
+
+    try expect(55 == try iter_memo_fib(10, &map));
+    try expect(34 == try iter_memo_fib(9, &map));
+    try expect(21 == try iter_memo_fib(8, &map));
+    try expect(13 == try iter_memo_fib(7, &map));
+    try expect(8 == try iter_memo_fib(6, &map));
+    try expect(5 == try iter_memo_fib(5, &map));
+    try expect(3 == try iter_memo_fib(4, &map));
+    try expect(2 == try iter_memo_fib(3, &map));
+    try expect(1 == try iter_memo_fib(2, &map));
+    try expect(1 == try iter_memo_fib(1, &map));
+    try expect(0 == try iter_memo_fib(0, &map));
 }
