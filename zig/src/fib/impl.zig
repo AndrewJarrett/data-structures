@@ -54,18 +54,24 @@ pub fn iter_fib(n: u8) u64 {
 pub fn iter_memo_fib(n: u8, map: *AutoHashMap(u8, u64)) !u64 {
     var sum: u64 = 0;
 
-    var result = map.getOrPut(n);
+    var result = try map.getOrPut(n);
 
     if (result.found_existing) {
         sum = result.value_ptr.*;
     }
     else {
-        for (0..n) |x| {
+        for (0..(n+1)) |i| {
+            const x: u8 = @intCast(i);
+
             if (x == 0 or x == 1) {
-                try map.put(x, x);
-                sum = x;
+                sum = i;
             }
-            sum = map.get(x - 2) + map.get(x - 1);
+            else {
+                const val_1 = map.get(x - 2).?;
+                const val_2 = map.get(x - 1).?;
+                sum = val_1 + val_2;
+            }
+
             try map.put(x, sum);
         }
     }
