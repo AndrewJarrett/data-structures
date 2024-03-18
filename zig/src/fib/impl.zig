@@ -3,9 +3,13 @@ const expect = std.testing.expect;
 const AutoHashMap = std.AutoHashMap;
 
 pub const key_type = u16;
-pub const val_type = u1024;
-pub const max_test_n: key_type = 1476;
-pub const max_test_loops: key_type = 20;
+pub const val_type = u4092;
+pub const max_test_n: key_type = std.math.maxInt(key_type) - 1;
+pub const max_test_loops: key_type = 100;
+
+pub const FibOops = error {
+    TooBig
+};
 
 // Write the nth Fibonacci number
 pub fn fibonacci(n: key_type) val_type {
@@ -36,7 +40,7 @@ pub fn memo_fib(n: key_type, map: *AutoHashMap(key_type, val_type)) !val_type {
 }
 
 // Iterate to the nth fibonacci number
-pub fn iter_fib(n: key_type) val_type {
+pub fn iter_fib(n: key_type) !val_type {
     var sum: val_type = 0;
 
     if (n < 2) {
@@ -46,9 +50,15 @@ pub fn iter_fib(n: key_type) val_type {
         var sum_2: val_type = 0;
         var sum_1: val_type = 1;
         for (1..n) |_| {
-            sum = sum_2 + sum_1;
-            sum_2 = sum_1;
-            sum_1 = sum;
+            const add_result = @addWithOverflow(sum_2, sum_1);
+            if (add_result[1] != 0) {
+                return FibOops.TooBig;
+            }
+            else {
+                sum = add_result[0];
+                sum_2 = sum_1;
+                sum_1 = sum;
+            }
         }
     }
 
@@ -75,7 +85,13 @@ pub fn iter_memo_fib(n: key_type, map: *AutoHashMap(key_type, val_type)) !val_ty
             else {
                 const val_1 = map.get(x - 2).?;
                 const val_2 = map.get(x - 1).?;
-                sum = val_1 + val_2;
+                const add_result = @addWithOverflow(val_1, val_2);
+                if (add_result[1] != 0) {
+                    return FibOops.TooBig;
+                }
+                else {
+                    sum = add_result[0];
+                }
             }
 
             try map.put(x, sum);
@@ -120,17 +136,20 @@ test "it should memomize the fibonachos" {
 }
 
 test "it should iter to the nth fibber" {
-        try expect(0 == iter_fib(0));
-        try expect(1 == iter_fib(1));
-        try expect(1 == iter_fib(2));
-        try expect(2 == iter_fib(3));
-        try expect(3 == iter_fib(4));
-        try expect(5 == iter_fib(5));
-        try expect(8 == iter_fib(6));
-        try expect(13 == iter_fib(7));
-        try expect(21 == iter_fib(8));
-        try expect(34 == iter_fib(9));
-        try expect(55 == iter_fib(10));
+        try expect(0 == try iter_fib(0));
+        try expect(1 == try iter_fib(1));
+        try expect(1 == try iter_fib(2));
+        try expect(2 == try iter_fib(3));
+        try expect(3 == try iter_fib(4));
+        try expect(5 == try iter_fib(5));
+        try expect(8 == try iter_fib(6));
+        try expect(13 == try iter_fib(7));
+        try expect(21 == try iter_fib(8));
+        try expect(34 == try iter_fib(9));
+        try expect(55 == try iter_fib(10));
+
+        // Try an overflow.
+        try std.testing.expectError(FibOops.TooBig, iter_fib(max_test_n));
 }
 
 test "it should memorate the fibonate" {
@@ -151,4 +170,7 @@ test "it should memorate the fibonate" {
     try expect(1 == try iter_memo_fib(2, &map));
     try expect(1 == try iter_memo_fib(1, &map));
     try expect(0 == try iter_memo_fib(0, &map));
+
+    // Try an overflow.
+    try std.testing.expectError(FibOops.TooBig, iter_memo_fib(max_test_n, &map));
 }

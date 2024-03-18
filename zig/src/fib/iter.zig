@@ -11,17 +11,17 @@ pub fn main() void {
     var sum: val_type = 0;
 
     for (0..loops) |loop| {
-        while (x <= n) {
-            sum = fib.iter_fib(x);
-            std.debug.print("Loop {}: The {}th fibonacci number is {}\n", .{ loop, x, sum });
-
+        while (x <= fib.max_test_n) {
+            if (fib.iter_fib(x)) |num| {
+                sum = num;
+            }
+            else |err| switch (err) {
+                error.TooBig => {
+                    std.debug.print("Loop {}: Error: {}; Fibonacci info: number = {}; value = {}\n", .{ loop, err, (x - 1), sum });
+                    break;
+                }
+            }
             x += 1;
-            //if (x == 0) {
-            //    break;
-            //}
-            //else {
-            //    x -= 1;
-            //}
         }
         x = n;
     }

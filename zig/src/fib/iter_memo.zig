@@ -18,17 +18,20 @@ pub fn main() !void {
     var map = AutoHashMap(key_type, val_type).init(alloc);
 
     for (0..loops) |loop| {
-        while (x <= n) {
-            sum = try fib.iter_memo_fib(x, &map);
-            std.debug.print("Loop {}: The {}th fibonacci number is {}\n", .{ loop, x, sum });
-
+        while (x <= fib.max_test_n) {
+            if (fib.iter_memo_fib(x, &map)) |num| {
+                sum = num;
+            } else |err| switch (err) {
+                error.TooBig => {
+                    std.debug.print("Loop {}: Error: {}; Fibonacci info: number = {}; value = {}\n", .{ loop, err, (x - 1), sum });
+                    break;
+                },
+                error.OutOfMemory => {
+                    std.debug.print("Ran out of memory. Tough luck. {}\n", .{ err });
+                    break;
+                }
+            }
             x += 1;
-            //if (x == 0) {
-            //    break;
-            //}
-            //else {
-            //    x -= 1;
-            //}
         }
         x = n;
     }
