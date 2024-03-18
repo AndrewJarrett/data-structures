@@ -2,8 +2,13 @@ const std = @import("std");
 const expect = std.testing.expect;
 const AutoHashMap = std.AutoHashMap;
 
+pub const key_type = u16;
+pub const val_type = u1024;
+pub const max_test_n: key_type = 1476;
+pub const max_test_loops: key_type = 20;
+
 // Write the nth Fibonacci number
-pub fn fibonacci(n: u16) u128 {
+pub fn fibonacci(n: key_type) val_type {
     if (n == 0) return 0;
     if (n == 1) return 1;
 
@@ -11,7 +16,7 @@ pub fn fibonacci(n: u16) u128 {
 }
 
 // Memoize the nth fibonacci number
-pub fn memo_fib(n: u16, map: *AutoHashMap(u16, u128)) !u128 {
+pub fn memo_fib(n: key_type, map: *AutoHashMap(key_type, val_type)) !val_type {
     const result = try map.getOrPut(n);
     
     if (result.found_existing) {
@@ -31,15 +36,15 @@ pub fn memo_fib(n: u16, map: *AutoHashMap(u16, u128)) !u128 {
 }
 
 // Iterate to the nth fibonacci number
-pub fn iter_fib(n: u16) u128 {
-    var sum: u128 = 0;
+pub fn iter_fib(n: key_type) val_type {
+    var sum: val_type = 0;
 
     if (n < 2) {
         sum = @intCast(n);
     }
     else {
-        var sum_2: u128 = 0;
-        var sum_1: u128 = 1;
+        var sum_2: val_type = 0;
+        var sum_1: val_type = 1;
         for (1..n) |_| {
             sum = sum_2 + sum_1;
             sum_2 = sum_1;
@@ -51,17 +56,18 @@ pub fn iter_fib(n: u16) u128 {
 }
 
 // Memorator to the Fibonator
-pub fn iter_memo_fib(n: u16, map: *AutoHashMap(u16, u128)) !u128 {
-    var sum: u128 = 0;
+pub fn iter_memo_fib(n: key_type, map: *AutoHashMap(key_type, val_type)) !val_type {
+    var sum: val_type = 0;
 
     var result = try map.getOrPut(n);
 
     if (result.found_existing) {
+        //std.debug.print("Found value: {}", .{ result.value_ptr.* });
         sum = result.value_ptr.*;
     }
     else {
         for (0..(n+1)) |i| {
-            const x: u16 = @intCast(i);
+            const x: key_type = @intCast(i);
 
             if (x == 0 or x == 1) {
                 sum = i;
@@ -98,7 +104,7 @@ test "it should memomize the fibonachos" {
     defer arena.deinit();
 
     const alloc = arena.allocator();
-    var map = AutoHashMap(u16, u128).init(alloc);
+    var map = AutoHashMap(key_type, val_type).init(alloc);
 
     try expect(55 == try memo_fib(10, &map));
     try expect(34 == try memo_fib(9, &map));
@@ -132,7 +138,7 @@ test "it should memorate the fibonate" {
     defer arena.deinit();
 
     const alloc = arena.allocator();
-    var map = AutoHashMap(u16, u128).init(alloc);
+    var map = AutoHashMap(key_type, val_type).init(alloc);
 
     try expect(55 == try iter_memo_fib(10, &map));
     try expect(34 == try iter_memo_fib(9, &map));

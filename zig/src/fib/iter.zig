@@ -1,12 +1,28 @@
 const std = @import("std");
 const fib = @import("impl.zig");
 
+const key_type = fib.key_type;
+const val_type = fib.val_type;
+const n: key_type = fib.max_test_n;
+const loops: key_type = fib.max_test_loops;
+
 pub fn main() void {
-    var n: u16 = 150;
+    var x: key_type = 0;
+    var sum: val_type = 0;
 
-    var sum: u128 = fib.iter_fib(n);
-    std.debug.print("The {}th fibonacci number is {}\n", .{ n, sum });
+    for (0..loops) |loop| {
+        while (x <= n) {
+            sum = fib.iter_fib(x);
+            std.debug.print("Loop {}: The {}th fibonacci number is {}\n", .{ loop, x, sum });
 
-    sum = fib.iter_fib(n/2);
-    std.debug.print("The {}th fibonacci number is {}\n", .{ (n/2), sum });
+            x += 1;
+            //if (x == 0) {
+            //    break;
+            //}
+            //else {
+            //    x -= 1;
+            //}
+        }
+        x = n;
+    }
 }
