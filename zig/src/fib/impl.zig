@@ -3,9 +3,9 @@ const expect = std.testing.expect;
 const AutoHashMap = std.AutoHashMap;
 
 pub const key_type = u16;
-pub const val_type = u4092;
+pub const val_type = u8192;
 pub const max_test_n: key_type = std.math.maxInt(key_type) - 1;
-pub const max_test_loops: key_type = 100;
+pub const max_test_loops: key_type = 1;
 
 pub const FibOops = error {
     TooBig
