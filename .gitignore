@@ -1,4 +1,11 @@
-rust/target/**
-rust/target/.*
-**/target/
-**/zig-cache/
+# Rust ignore
+target/
+debug/
+*.pdb
+
+# Zig ignore
+zig-cache/
+zig-out/
+/release/
+/debug/
+/build/
