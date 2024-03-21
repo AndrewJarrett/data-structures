@@ -1,18 +1,21 @@
 use crate::ll::{Node, LinkedList};
 
+use std::convert::TryFrom;
+
 mod ll;
 
 fn main() {
     // Do linked list stuff
-    let node: Node<u32> = Node::<u32>::new(0, None);
+    let value: u32 = 0;
 
-    let mut list = LinkedList::<u32>::new(&node);
+    let mut list = LinkedList::<u32>::new(Some(value));
 
-    dbg!(list);
+    dbg!(&list);
 
     for i in 1..100 {
-        let new_node: Node<u32> = Node::<u32>::new(i, None);
-        list.add(i.into(), &new_node);
-        dbg!(list);
+        list.add(usize::try_from(i).unwrap(), i);
+        dbg!(&list);
     }
+
+    dbg!(list);
 }
