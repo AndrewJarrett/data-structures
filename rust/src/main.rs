@@ -1,6 +1,4 @@
-use crate::ll::{Node, LinkedList};
-
-use std::convert::TryFrom;
+use crate::ll::LinkedList;
 
 mod ll;
 
@@ -13,8 +11,13 @@ fn main() {
     dbg!(&list);
 
     for i in 1..100 {
-        list.add(usize::try_from(i).unwrap(), i);
-        dbg!(&list);
+        let _ = list.add_first(i);
+    }
+
+    dbg!(&list);
+
+    for _i in 1..101 {
+        dbg!(list.remove_first());
     }
 
     dbg!(list);
